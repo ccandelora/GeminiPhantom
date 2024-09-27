@@ -1,4 +1,10 @@
 /* Custom styles on top of Tailwind CSS */
+body {
+    background-image: url('../images/mystical-background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+}
+
 .crystal-ball {
     animation: glow 2s infinite alternate;
 }
@@ -16,6 +22,9 @@
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    background: rgba(76, 29, 149, 0.7);
+    border: 1px solid #8b5cf6;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
 }
 
 .psychic-response.show {
@@ -39,4 +48,39 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.mystic-input {
+    background: rgba(30, 27, 75, 0.7);
+    border: 1px solid #6d28d9;
+    transition: all 0.3s ease;
+}
+
+.mystic-input:focus {
+    box-shadow: 0 0 10px #8b5cf6;
+}
+
+.mystic-button {
+    background: linear-gradient(45deg, #6d28d9, #8b5cf6);
+    transition: all 0.3s ease;
+}
+
+.mystic-button:hover {
+    background: linear-gradient(45deg, #8b5cf6, #6d28d9);
+    transform: scale(1.05);
+}
+
+.tarot-card {
+    width: 100px;
+    height: 150px;
+    background-image: url('../images/tarot-back.jpg');
+    background-size: cover;
+    position: absolute;
+    transition: all 0.5s ease;
+}
+
+#tarot-spread {
+    height: 200px;
+    position: relative;
+    margin-bottom: 2rem;
 }
