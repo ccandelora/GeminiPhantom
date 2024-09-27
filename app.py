@@ -87,7 +87,7 @@ def ask_psychic():
         if isinstance(response, GenerateContentResponse):
             answer = response.text
         else:
-            raise ValueError("Unexpected response type from Gemini API")
+            raise ValueError(f"Unexpected response type from Gemini API: {type(response)}")
         
         # Save the session
         session = Session(user_id=current_user.id, question=question, response=answer)
@@ -98,8 +98,8 @@ def ask_psychic():
     
     except Exception as e:
         app.logger.error(f"Error generating psychic response: {str(e)}")
-        fallback_response = "The spirits are unclear at this moment. Please try again later."
-        return jsonify({'response': fallback_response}), 500
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
 
 @app.route('/past_sessions')
 @login_required

@@ -19,12 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        // User is not authenticated, redirect to login page
-                        window.location.href = '/login';
-                        return;
-                    }
-                    throw new Error('Network response was not ok');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Network response was not ok');
                 }
 
                 const data = await response.json();
@@ -32,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 questionInput.value = '';
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while communicating with the psychic realm. Please try again.');
+                displayResponse(question, `An error occurred: ${error.message}. Please try again later.`);
             }
         });
     }
@@ -46,11 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         responseContainer.prepend(responseElement);
 
-        // Trigger reflow to ensure the transition applies
         responseElement.offsetHeight;
         responseElement.classList.add('show');
 
-        // Scroll to the new response
         responseElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
