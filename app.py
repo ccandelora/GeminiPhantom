@@ -102,6 +102,7 @@ def ask_psychic():
     
     try:
         app.logger.info(f"Received question: {question}")
+        app.logger.info(f"Selected personality: {personality_key}")
         
         if personality_key == 'random':
             personality_key = random.choice(list(PSYCHIC_PERSONALITIES.keys()))
@@ -109,12 +110,18 @@ def ask_psychic():
         personality = PSYCHIC_PERSONALITIES[personality_key]
         prompt = personality['prompt'].format(question=question)
         
+        app.logger.info(f"Generated prompt: {prompt}")
         app.logger.info("Sending request to Gemini API")
         try:
             response = model.generate_content(prompt)
-            app.logger.info(f"Received response from Gemini API: {response}")
+            app.logger.info(f"Received raw response from Gemini API: {response}")
+            app.logger.info(f"Response type: {type(response)}")
+            if hasattr(response, 'parts'):
+                app.logger.info(f"Response parts: {response.parts}")
+            else:
+                app.logger.info("Response has no 'parts' attribute")
         except Exception as api_error:
-            app.logger.error(f"Gemini API error: {str(api_error)}")
+            app.logger.error(f"Gemini API error: {type(api_error).__name__}: {str(api_error)}")
             raise
 
         if response.parts:
@@ -132,7 +139,7 @@ def ask_psychic():
             raise ValueError("No content in the response")
     
     except Exception as e:
-        app.logger.error(f"Error generating psychic response: {str(e)}", exc_info=True)
+        app.logger.error(f"Error in ask_psychic: {type(e).__name__}: {str(e)}", exc_info=True)
         error_message = "The spirits are unclear at this moment. Please try again later."
         return jsonify({'error': error_message}), 500
 
