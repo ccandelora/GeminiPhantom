@@ -2,7 +2,6 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import google.generativeai as genai
-from google.generativeai.types import GenerateContentResponse
 from models import db, User, Session
 import logging
 
@@ -87,23 +86,24 @@ def ask_psychic():
         response = model.generate_content(prompt)
         app.logger.info(f"Received response from Gemini API: {response}")
         
-        if isinstance(response, GenerateContentResponse):
-            if response.text:
-                answer = response.text
-            else:
-                raise ValueError("No content in the response")
+        if response.parts:
+            answer = response.text
+            app.logger.info(f"Processed answer: {answer}")
+            
+            # Save the session
+            session = Session(user_id=current_user.id, question=question, response=answer)
+            db.session.add(session)
+            db.session.commit()
+            app.logger.info("Session saved to database")
+            
+            return jsonify({'response': answer})
         else:
-            raise ValueError(f"Unexpected response type from Gemini API: {type(response)}")
-        
-        app.logger.info(f"Processed answer: {answer}")
-        
-        # Save the session
-        session = Session(user_id=current_user.id, question=question, response=answer)
-        db.session.add(session)
-        db.session.commit()
-        app.logger.info("Session saved to database")
-        
-        return jsonify({'response': answer})
+            raise ValueError("No content in the response")
+    
+    except genai.types.generation_types.BlockedPromptException as e:
+        app.logger.error(f"Blocked prompt: {str(e)}")
+        error_message = "I'm sorry, but I can't respond to that type of question. Please try asking something else."
+        return jsonify({'error': error_message}), 400
     
     except Exception as e:
         app.logger.error(f"Error generating psychic response: {str(e)}", exc_info=True)
