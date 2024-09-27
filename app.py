@@ -28,7 +28,7 @@ genai.configure(api_key=app.config['GEMINI_API_KEY'])
 model = genai.GenerativeModel('gemini-pro')
 
 # Configure logging
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 def index():
@@ -80,9 +80,12 @@ def ask_psychic():
     question = request.json['question']
     
     try:
+        app.logger.info(f"Received question: {question}")
         prompt = f"As a psychic medium, provide a mystical and intuitive response to the following question: '{question}'. Be vague yet comforting, and use language that a psychic medium might use."
         
+        app.logger.info("Sending request to Gemini API")
         response = model.generate_content(prompt)
+        app.logger.info(f"Received response from Gemini API: {response}")
         
         if isinstance(response, GenerateContentResponse):
             if response.text:
@@ -92,15 +95,18 @@ def ask_psychic():
         else:
             raise ValueError(f"Unexpected response type from Gemini API: {type(response)}")
         
+        app.logger.info(f"Processed answer: {answer}")
+        
         # Save the session
         session = Session(user_id=current_user.id, question=question, response=answer)
         db.session.add(session)
         db.session.commit()
+        app.logger.info("Session saved to database")
         
         return jsonify({'response': answer})
     
     except Exception as e:
-        app.logger.error(f"Error generating psychic response: {str(e)}")
+        app.logger.error(f"Error generating psychic response: {str(e)}", exc_info=True)
         error_message = "The spirits are unclear at this moment. Please try again later."
         return jsonify({'error': error_message}), 500
 
