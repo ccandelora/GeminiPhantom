@@ -4,6 +4,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 import google.generativeai as genai
 from models import db, User, Session
 import logging
+import random
 
 app = Flask(__name__)
 
@@ -29,9 +30,29 @@ model = genai.GenerativeModel('gemini-pro')
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+# Define psychic medium personalities
+PSYCHIC_PERSONALITIES = {
+    'mystic_seer': {
+        'name': 'Mystic Seer',
+        'prompt': "As the Mystic Seer, you possess the ability to peer into the cosmic tapestry of fate. Your responses are cryptic yet profound, often referencing celestial bodies and the ebb and flow of cosmic energies. Provide a mystical and intuitive response to the following question: '{question}'. Be vague yet comforting, and use language that a mystic seer might use."
+    },
+    'spirit_whisperer': {
+        'name': 'Spirit Whisperer',
+        'prompt': "As the Spirit Whisperer, you have a unique connection to the realm of departed souls. Your responses often include messages or impressions from loved ones who have passed on. Provide a comforting and insightful response to the following question: '{question}'. Be gentle and empathetic, using language that a medium communicating with spirits might use."
+    },
+    'fortune_teller': {
+        'name': 'Fortune Teller',
+        'prompt': "As the Fortune Teller, you have the gift of foresight and can glimpse potential futures. Your responses often include predictions or warnings about upcoming events. Provide an intriguing and forward-looking response to the following question: '{question}'. Be dramatic yet cautious, using language that a fortune teller might use."
+    },
+    'tarot_master': {
+        'name': 'Tarot Master',
+        'prompt': "As the Tarot Master, you possess deep wisdom of the arcane symbolism in tarot cards. Your responses often reference specific tarot cards and their meanings. Provide an insightful interpretation to the following question: '{question}'. Be symbolic and thought-provoking, using language that a tarot reader might use."
+    }
+}
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', personalities=PSYCHIC_PERSONALITIES)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -77,10 +98,12 @@ def logout():
 @login_required
 def ask_psychic():
     question = request.json['question']
+    personality_key = request.json.get('personality', random.choice(list(PSYCHIC_PERSONALITIES.keys())))
+    personality = PSYCHIC_PERSONALITIES[personality_key]
     
     try:
         app.logger.info(f"Received question: {question}")
-        prompt = f"As a psychic medium, provide a mystical and intuitive response to the following question: '{question}'. Be vague yet comforting, and use language that a psychic medium might use."
+        prompt = personality['prompt'].format(question=question)
         
         app.logger.info("Sending request to Gemini API")
         try:
@@ -95,12 +118,12 @@ def ask_psychic():
             app.logger.info(f"Processed answer: {answer}")
             
             # Save the session
-            session = Session(user_id=current_user.id, question=question, response=answer)
+            session = Session(user_id=current_user.id, question=question, response=answer, personality=personality['name'])
             db.session.add(session)
             db.session.commit()
             app.logger.info("Session saved to database")
             
-            return jsonify({'response': answer})
+            return jsonify({'response': answer, 'personality': personality['name']})
         else:
             raise ValueError("No content in the response")
     
@@ -114,11 +137,6 @@ def ask_psychic():
 def past_sessions():
     sessions = current_user.sessions.order_by(Session.timestamp.desc()).all()
     return render_template('past_sessions.html', sessions=sessions)
-
-# Add a test endpoint
-@app.route('/test', methods=['GET'])
-def test_endpoint():
-    return jsonify({'status': 'ok', 'message': 'Test endpoint is working'}), 200
 
 if __name__ == '__main__':
     with app.app_context():

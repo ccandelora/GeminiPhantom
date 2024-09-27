@@ -10,6 +10,7 @@
         {% for session in sessions %}
             <div class="bg-gray-800 p-4 rounded-lg">
                 <p class="text-sm text-gray-400">{{ session.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p class="text-sm text-purple-400 mt-1">Psychic: {{ session.personality }}</p>
                 <p class="font-semibold mt-2">Q: {{ session.question }}</p>
                 <p class="mt-2">A: {{ session.response }}</p>
             </div>
