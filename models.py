@@ -9,7 +9,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(255))
     sessions = db.relationship('Session', backref='user', lazy='dynamic')
 
     def set_password(self, password):
@@ -24,4 +24,3 @@ class Session(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     question = db.Column(db.String(255), nullable=False)
     response = db.Column(db.Text, nullable=False)
-
