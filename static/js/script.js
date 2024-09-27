@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let recognition;
     let speechSynthesis = window.speechSynthesis;
     let isSpeechOutputEnabled = false;
+    let voiceInputTimeout;
 
     // Check if Web Speech API is supported
     const isSpeechRecognitionSupported = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
@@ -168,10 +169,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
                 questionInput.placeholder = 'Listening...';
                 microphoneIcon.classList.remove('hidden');
+                
+                // Set a timeout to stop voice input after 10 seconds
+                voiceInputTimeout = setTimeout(() => {
+                    console.log('Voice input timeout reached');
+                    stopVoiceInput();
+                }, 10000);
             };
 
             recognition.onresult = (event) => {
                 console.log('Speech recognition result received');
+                clearTimeout(voiceInputTimeout);
                 const speechResult = event.results[0][0].transcript;
                 questionInput.value = speechResult;
                 console.log('Recognized speech:', speechResult);
@@ -181,17 +189,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
+                clearTimeout(voiceInputTimeout);
                 stopVoiceInput();
-                displayErrorMessage(`Speech recognition error: ${event.error}. Please try again.`);
+                displayErrorMessage(`Speech recognition error: ${event.error}. Please try again or use text input.`);
             };
 
             recognition.onend = () => {
                 console.log('Speech recognition ended');
+                clearTimeout(voiceInputTimeout);
                 stopVoiceInput();
             };
         } catch (error) {
             console.error('Error initializing speech recognition:', error);
-            displayErrorMessage('Failed to initialize speech recognition. Please try again.');
+            displayErrorMessage('Failed to initialize speech recognition. Please try again or use text input.');
         }
     }
 
@@ -206,12 +216,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .catch((error) => {
                     console.error('Microphone permission denied:', error);
-                    displayErrorMessage('Microphone access is required for voice input. Please grant permission and try again.');
+                    displayErrorMessage('Microphone access is required for voice input. Please grant permission and try again, or use text input.');
                     stopVoiceInput();
                 });
         } catch (error) {
             console.error('Error starting voice input:', error);
-            displayErrorMessage('Failed to start voice input. Please try again.');
+            displayErrorMessage('Failed to start voice input. Please try again or use text input.');
             stopVoiceInput();
         }
     }
@@ -219,7 +229,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopVoiceInput() {
         console.log('Stopping voice input');
         try {
-            recognition.stop();
+            if (recognition && recognition.state === 'running') {
+                recognition.stop();
+                console.log('Recognition stopped successfully');
+            } else {
+                console.log('Recognition was not running, no need to stop');
+            }
+        } catch (error) {
+            console.error('Error stopping voice input:', error);
+        } finally {
             updateButtonState(
                 startVoiceInputButton,
                 true,
@@ -230,9 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             questionInput.placeholder = 'Ask your question...';
             microphoneIcon.classList.add('hidden');
-        } catch (error) {
-            console.error('Error stopping voice input:', error);
-            displayErrorMessage('Failed to stop voice input. Please refresh the page and try again.');
         }
     }
 
@@ -258,11 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 speechSynthesis.speak(utterance);
             } catch (error) {
                 console.error('Error in speech synthesis:', error);
-                displayErrorMessage('Failed to speak the response. Please try again.');
+                displayErrorMessage('Failed to speak the response. Please try again or read the response.');
             }
         } else {
             console.error('Speech synthesis not supported');
-            displayErrorMessage('Speech synthesis is not supported in your browser.');
+            displayErrorMessage('Speech synthesis is not supported in your browser. Please read the response.');
         }
     }
 

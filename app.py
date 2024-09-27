@@ -6,6 +6,8 @@ import google.generativeai as genai
 from models import db, User, Session
 import logging
 import random
+import time
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 app = Flask(__name__)
 
@@ -96,6 +98,15 @@ def logout():
     flash('Logged out successfully.', 'success')
     return redirect(url_for('index'))
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def generate_psychic_response(prompt):
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        app.logger.error(f"Error generating response from Gemini API: {str(e)}")
+        raise
+
 @app.route('/ask', methods=['POST'])
 @login_required
 def ask_psychic():
@@ -113,24 +124,18 @@ def ask_psychic():
         
         app.logger.info("Sending request to Gemini API")
         try:
-            response = model.generate_content(prompt)
-            app.logger.info(f"Received response from Gemini API: {response}")
+            answer = generate_psychic_response(prompt)
+            app.logger.info(f"Received response from Gemini API: {answer}")
         except Exception as api_error:
-            app.logger.error(f"Gemini API error: {str(api_error)}")
+            app.logger.error(f"Gemini API error after retries: {str(api_error)}")
             raise
 
-        if response.parts:
-            answer = response.text
-            app.logger.info(f"Processed answer: {answer}")
-            
-            session = Session(user_id=current_user.id, question=question, response=answer, personality=personality_name)
-            db.session.add(session)
-            db.session.commit()
-            app.logger.info("Session saved to database")
-            
-            return jsonify({'response': answer, 'personality': personality['name']})
-        else:
-            raise ValueError("No content in the response")
+        session = Session(user_id=current_user.id, question=question, response=answer, personality=personality_name)
+        db.session.add(session)
+        db.session.commit()
+        app.logger.info("Session saved to database")
+        
+        return jsonify({'response': answer, 'personality': personality['name']})
     
     except Exception as e:
         app.logger.error(f"Error generating psychic response: {str(e)}", exc_info=True)
