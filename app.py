@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import google.generativeai as genai
 from models import db, User, Session
+from flask_migrate import Migrate
 import logging
 import random
 
@@ -13,6 +14,9 @@ app.config.from_object('config.Config')
 
 # Initialize database
 db.init_app(app)
+
+# Initialize Flask-Migrate
+migrate = Migrate(app, db)
 
 # Initialize LoginManager
 login_manager = LoginManager()
@@ -139,6 +143,4 @@ def past_sessions():
     return render_template('past_sessions.html', sessions=sessions)
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(host='0.0.0.0', port=5000)
