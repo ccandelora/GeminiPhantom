@@ -58,12 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Toggle speech output button click event listener attached');
     }
 
+    // Remove 'required' attribute from question input
+    if (questionInput) {
+        questionInput.removeAttribute('required');
+    }
+
     async function handleQuestionSubmit(e) {
         e.preventDefault();
         console.log('Question form submitted');
         const question = questionInput.value.trim();
         const personality = personalitySelect.value;
-        if (!question) return;
+        if (!question) {
+            console.log('Empty question, not submitting');
+            return;
+        }
 
         try {
             const response = await fetch('/ask', {
@@ -113,35 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         console.log('Toggle voice input clicked');
         if (!recognition) {
-            try {
-                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                recognition.lang = 'en-US';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
-                recognition.onresult = (event) => {
-                    console.log('Speech recognition result received');
-                    const speechResult = event.results[0][0].transcript;
-                    questionInput.value = speechResult;
-                    stopVoiceInput();
-                    questionForm.dispatchEvent(new Event('submit'));
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                    stopVoiceInput();
-                    displayErrorMessage('Speech recognition error. Please try again.');
-                };
-
-                recognition.onend = () => {
-                    console.log('Speech recognition ended');
-                    stopVoiceInput();
-                };
-            } catch (error) {
-                console.error('Error initializing speech recognition:', error);
-                displayErrorMessage('Failed to initialize speech recognition. Please try again.');
-                return;
-            }
+            initializeSpeechRecognition();
         }
 
         if (recognition.state !== 'running') {
@@ -151,19 +131,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function initializeSpeechRecognition() {
+        console.log('Initializing speech recognition');
+        try {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                console.log('Speech recognition started');
+                updateButtonState(
+                    startVoiceInputButton,
+                    true,
+                    'Stop Voice Input',
+                    'Start Voice Input',
+                    'bg-red-600 hover:bg-red-700',
+                    'bg-blue-600 hover:bg-blue-700'
+                );
+                questionInput.placeholder = 'Listening...';
+            };
+
+            recognition.onresult = (event) => {
+                console.log('Speech recognition result received');
+                const speechResult = event.results[0][0].transcript;
+                questionInput.value = speechResult;
+                console.log('Recognized speech:', speechResult);
+                stopVoiceInput();
+                questionForm.dispatchEvent(new Event('submit'));
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                stopVoiceInput();
+                displayErrorMessage('Speech recognition error. Please try again.');
+            };
+
+            recognition.onend = () => {
+                console.log('Speech recognition ended');
+                stopVoiceInput();
+            };
+        } catch (error) {
+            console.error('Error initializing speech recognition:', error);
+            displayErrorMessage('Failed to initialize speech recognition. Please try again.');
+        }
+    }
+
     function startVoiceInput() {
         console.log('Starting voice input');
         try {
+            questionInput.value = ''; // Clear previous questions
             recognition.start();
-            updateButtonState(
-                startVoiceInputButton,
-                true,
-                'Stop Voice Input',
-                'Start Voice Input',
-                'bg-red-600 hover:bg-red-700',
-                'bg-blue-600 hover:bg-blue-700'
-            );
-            questionInput.placeholder = 'Listening...';
         } catch (error) {
             console.error('Error starting voice input:', error);
             displayErrorMessage('Failed to start voice input. Please try again.');
