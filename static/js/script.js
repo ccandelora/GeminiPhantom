@@ -35,9 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
         starField.appendChild(star);
     }
 
-    // Check if fog and candle-flame elements exist
+    // Debug logging for fog and candle-flame elements
     console.log('Fog element:', document.querySelector('.fog'));
     console.log('Candle flames:', document.querySelectorAll('.candle-flame'));
+    console.log('Fog animation:', getComputedStyle(document.querySelector('.fog')).animation);
+    console.log('Candle flame animation:', getComputedStyle(document.querySelector('.candle-flame')).backgroundImage);
 
     async function handleFormSubmit(e) {
         e.preventDefault();
