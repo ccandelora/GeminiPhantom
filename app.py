@@ -5,6 +5,7 @@ import google.generativeai as genai
 from models import db, User, Session
 import logging
 import random
+from sqlalchemy.exc import DataError
 
 app = Flask(__name__)
 
@@ -115,7 +116,7 @@ def ask_psychic():
         app.logger.info("Sending request to Gemini API")
         try:
             response = model.generate_content(prompt)
-            app.logger.info(f"Received raw response from Gemini API: {response}")
+            app.logger.info(f"Full Gemini API response: {response}")
             app.logger.info(f"Response type: {type(response)}")
             if hasattr(response, 'parts'):
                 app.logger.info(f"Response parts: {response.parts}")
@@ -131,15 +132,24 @@ def ask_psychic():
             app.logger.info(f"Response length: {len(answer)}")
             
             # Save the session
-            session = Session(user_id=current_user.id, question=question, response=answer, personality=personality['name'])
-            db.session.add(session)
-            db.session.commit()
-            app.logger.info("Session saved to database")
+            try:
+                session = Session(user_id=current_user.id, question=question, response=answer, personality=personality['name'])
+                db.session.add(session)
+                db.session.commit()
+                app.logger.info("Session saved to database")
+            except DataError as db_error:
+                app.logger.error(f"Database error: {str(db_error)}")
+                db.session.rollback()
+                raise
             
             return jsonify({'response': answer, 'personality': personality['name']})
         else:
             raise ValueError("No content in the response")
     
+    except DataError as db_error:
+        app.logger.error(f"Database error: {str(db_error)}")
+        error_message = "An error occurred while saving your session. Please try again with a shorter question or response."
+        return jsonify({'error': error_message}), 500
     except Exception as e:
         app.logger.error(f"Error in ask_psychic: {type(e).__name__}: {str(e)}", exc_info=True)
         error_message = "The spirits are unclear at this moment. Please try again later."
