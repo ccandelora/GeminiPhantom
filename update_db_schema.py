@@ -5,6 +5,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade, init, stamp
 from sqlalchemy import inspect, text
+from flask.cli import with_appcontext
+from flask_migrate import upgrade as migrate_upgrade
+from flask_migrate import revision as migrate_revision
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -40,6 +43,15 @@ def log_database_schema(message):
         for column in inspector.get_columns(table_name):
             logging.info(f"  Column: {column['name']} (Type: {column['type']})")
 
+@with_appcontext
+def create_migration():
+    migrate_revision(autogenerate=True, message="Add personality column to session table")
+
+@with_appcontext
+def apply_migration():
+    migrate_upgrade()
+
+@with_appcontext
 def run_migrations():
     logging.info("Starting migration process...")
     
@@ -61,13 +73,10 @@ def run_migrations():
             stamp('head')
 
         logging.info("Creating new migration...")
-        migrate_obj = Migrate(app, db)
-        migrate_obj.init_app(app, db)
-        migrate_obj.migrate()
-        logging.info("Migration created successfully.")
+        create_migration()
 
         logging.info("Applying migration...")
-        upgrade()
+        apply_migration()
 
         logging.info("Verifying changes...")
         if verify_column_exists('session', 'personality'):
