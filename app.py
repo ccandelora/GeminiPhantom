@@ -1,39 +1,17 @@
 import os
-import time
-from functools import wraps
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import google.generativeai as genai
 from models import db, User, Session
 import logging
 import random
-from sqlalchemy.exc import DataError, OperationalError
-from config import Config  # Import the Config class
-
-def retry_on_exception(retries=3, backoff_in_seconds=1):
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            x = 0
-            while True:
-                try:
-                    return f(*args, **kwargs)
-                except OperationalError as e:
-                    if x == retries:
-                        raise
-                    else:
-                        x += 1
-                        time.sleep(backoff_in_seconds * 2 ** x)
-        return wrapper
-    return decorator
 
 app = Flask(__name__)
 
 # Load configuration
-app.config.from_object(Config)
+app.config.from_object('config.Config')
 
-# Initialize database with new configuration options
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = Config.SQLALCHEMY_ENGINE_OPTIONS
+# Initialize database
 db.init_app(app)
 
 # Initialize LoginManager
@@ -42,7 +20,6 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 @login_manager.user_loader
-@retry_on_exception(retries=3)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
@@ -119,62 +96,39 @@ def logout():
 
 @app.route('/ask', methods=['POST'])
 @login_required
-@retry_on_exception(retries=3)
 def ask_psychic():
     question = request.json['question']
-    personality_key = request.json.get('personality', 'random')
+    personality_key = request.json.get('personality', random.choice(list(PSYCHIC_PERSONALITIES.keys())))
+    personality = PSYCHIC_PERSONALITIES[personality_key]
     
     try:
         app.logger.info(f"Received question: {question}")
-        app.logger.info(f"Selected personality: {personality_key}")
-        app.logger.info(f"Question length: {len(question)}")
-        
-        if personality_key == 'random':
-            personality_key = random.choice(list(PSYCHIC_PERSONALITIES.keys()))
-        
-        personality = PSYCHIC_PERSONALITIES[personality_key]
         prompt = personality['prompt'].format(question=question)
         
-        app.logger.info(f"Generated prompt: {prompt}")
         app.logger.info("Sending request to Gemini API")
         try:
             response = model.generate_content(prompt)
-            app.logger.info(f"Full Gemini API response: {response}")
-            app.logger.info(f"Response type: {type(response)}")
-            if hasattr(response, 'parts'):
-                app.logger.info(f"Response parts: {response.parts}")
-            else:
-                app.logger.info("Response has no 'parts' attribute")
+            app.logger.info(f"Received response from Gemini API: {response}")
         except Exception as api_error:
-            app.logger.error(f"Gemini API error: {type(api_error).__name__}: {str(api_error)}")
+            app.logger.error(f"Gemini API error: {str(api_error)}")
             raise
 
         if response.parts:
             answer = response.text
             app.logger.info(f"Processed answer: {answer}")
-            app.logger.info(f"Response length: {len(answer)}")
             
             # Save the session
-            try:
-                session = Session(user_id=current_user.id, question=question, response=answer, personality=personality['name'])
-                db.session.add(session)
-                db.session.commit()
-                app.logger.info("Session saved to database")
-            except DataError as db_error:
-                app.logger.error(f"Database error: {str(db_error)}")
-                db.session.rollback()
-                raise
+            session = Session(user_id=current_user.id, question=question, response=answer, personality=personality['name'])
+            db.session.add(session)
+            db.session.commit()
+            app.logger.info("Session saved to database")
             
             return jsonify({'response': answer, 'personality': personality['name']})
         else:
             raise ValueError("No content in the response")
     
-    except DataError as db_error:
-        app.logger.error(f"Database error: {str(db_error)}")
-        error_message = "An error occurred while saving your session. Please try again with a shorter question or response."
-        return jsonify({'error': error_message}), 500
     except Exception as e:
-        app.logger.error(f"Error in ask_psychic: {type(e).__name__}: {str(e)}", exc_info=True)
+        app.logger.error(f"Error generating psychic response: {str(e)}", exc_info=True)
         error_message = "The spirits are unclear at this moment. Please try again later."
         return jsonify({'error': error_message}), 500
 
@@ -187,4 +141,4 @@ def past_sessions():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host='0.0.0.0', port=5000)

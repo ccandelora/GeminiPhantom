@@ -13,9 +13,3 @@ class Config:
     # Add other configuration settings here if needed
     DEBUG = True
     SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback_secret_key')
-
-    # New configuration for database connection retries
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 300,
-    }
