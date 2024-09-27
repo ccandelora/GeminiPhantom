@@ -26,8 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateButtonState(button, isEnabled, enabledText, disabledText, enabledClass, disabledClass) {
         button.disabled = !isEnabled;
         button.textContent = isEnabled ? enabledText : disabledText;
-        button.classList.remove(isEnabled ? disabledClass : enabledClass);
-        button.classList.add(isEnabled ? enabledClass : disabledClass);
+        button.className = button.className
+            .split(' ')
+            .filter(c => !c.startsWith('bg-'))
+            .concat(isEnabled ? enabledClass.split(' ') : disabledClass.split(' '))
+            .join(' ');
     }
 
     function checkBrowserCompatibility() {
