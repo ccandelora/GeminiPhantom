@@ -10,15 +10,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let speechSynthesis = window.speechSynthesis;
     let isSpeechOutputEnabled = false;
 
+    // Check if Web Speech API is supported
+    const isSpeechRecognitionSupported = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+    const isSpeechSynthesisSupported = 'speechSynthesis' in window;
+
+    if (!isSpeechRecognitionSupported) {
+        startVoiceInputButton.disabled = true;
+        startVoiceInputButton.textContent = 'Voice Input Not Supported';
+        startVoiceInputButton.classList.add('bg-gray-500');
+    }
+
+    if (!isSpeechSynthesisSupported) {
+        toggleSpeechOutputButton.disabled = true;
+        toggleSpeechOutputButton.textContent = 'Speech Output Not Supported';
+        toggleSpeechOutputButton.classList.add('bg-gray-500');
+    }
+
     if (questionForm) {
         questionForm.addEventListener('submit', handleQuestionSubmit);
     }
 
-    if (startVoiceInputButton) {
+    if (startVoiceInputButton && isSpeechRecognitionSupported) {
         startVoiceInputButton.addEventListener('click', toggleVoiceInput);
     }
 
-    if (toggleSpeechOutputButton) {
+    if (toggleSpeechOutputButton && isSpeechSynthesisSupported) {
         toggleSpeechOutputButton.addEventListener('click', toggleSpeechOutput);
     }
 
@@ -82,38 +98,67 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.onresult = (event) => {
                 const speechResult = event.results[0][0].transcript;
                 questionInput.value = speechResult;
-                recognition.stop();
-                startVoiceInputButton.textContent = 'Start Voice Input';
+                stopVoiceInput();
                 questionForm.dispatchEvent(new Event('submit'));
             };
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
-                startVoiceInputButton.textContent = 'Start Voice Input';
+                stopVoiceInput();
+                displayErrorMessage('Speech recognition error. Please try again.');
             };
 
             recognition.onend = () => {
-                startVoiceInputButton.textContent = 'Start Voice Input';
+                stopVoiceInput();
             };
         }
 
         if (recognition.state === 'inactive') {
-            recognition.start();
-            startVoiceInputButton.textContent = 'Stop Voice Input';
+            startVoiceInput();
         } else {
-            recognition.stop();
-            startVoiceInputButton.textContent = 'Start Voice Input';
+            stopVoiceInput();
         }
+    }
+
+    function startVoiceInput() {
+        recognition.start();
+        startVoiceInputButton.textContent = 'Stop Voice Input';
+        startVoiceInputButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        startVoiceInputButton.classList.add('bg-red-600', 'hover:bg-red-700');
+        questionInput.placeholder = 'Listening...';
+    }
+
+    function stopVoiceInput() {
+        recognition.stop();
+        startVoiceInputButton.textContent = 'Start Voice Input';
+        startVoiceInputButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+        startVoiceInputButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+        questionInput.placeholder = 'Ask your question...';
     }
 
     function toggleSpeechOutput(e) {
         e.preventDefault();
         isSpeechOutputEnabled = !isSpeechOutputEnabled;
         toggleSpeechOutputButton.textContent = isSpeechOutputEnabled ? 'Disable Speech Output' : 'Enable Speech Output';
+        toggleSpeechOutputButton.classList.toggle('bg-green-600');
+        toggleSpeechOutputButton.classList.toggle('bg-red-600');
     }
 
     function speakResponse(text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        speechSynthesis.speak(utterance);
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        } else {
+            console.error('Speech synthesis not supported');
+            displayErrorMessage('Speech synthesis is not supported in your browser.');
+        }
+    }
+
+    function displayErrorMessage(message) {
+        const errorElement = document.createElement('div');
+        errorElement.classList.add('error-message', 'mb-4', 'p-4', 'bg-red-600', 'rounded-lg', 'shadow-md');
+        errorElement.textContent = message;
+        responseContainer.prepend(errorElement);
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
