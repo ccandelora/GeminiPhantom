@@ -44,17 +44,12 @@ body {
 
 /* Crystal ball */
 .crystal-ball {
-    animation: glow 2s infinite alternate, swirl 10s linear infinite;
+    animation: glow 2s infinite alternate, float 6s ease-in-out infinite;
 }
 
 @keyframes glow {
     from { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7)); }
     to { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)); }
-}
-
-@keyframes swirl {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 /* UI Elements */
