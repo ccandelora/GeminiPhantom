@@ -1,0 +1,24 @@
+/* Custom styles on top of Tailwind CSS */
+.crystal-ball {
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+    }
+    to {
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
+    }
+}
+
+.psychic-response {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.psychic-response.show {
+    opacity: 1;
+    transform: translateY(0);
+}
