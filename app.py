@@ -83,9 +83,13 @@ def ask_psychic():
         prompt = f"As a psychic medium, provide a mystical and intuitive response to the following question: '{question}'. Be vague yet comforting, and use language that a psychic medium might use."
         
         app.logger.info("Sending request to Gemini API")
-        response = model.generate_content(prompt)
-        app.logger.info(f"Received response from Gemini API: {response}")
-        
+        try:
+            response = model.generate_content(prompt)
+            app.logger.info(f"Received response from Gemini API: {response}")
+        except Exception as api_error:
+            app.logger.error(f"Gemini API error: {str(api_error)}")
+            raise
+
         if response.parts:
             answer = response.text
             app.logger.info(f"Processed answer: {answer}")
@@ -100,11 +104,6 @@ def ask_psychic():
         else:
             raise ValueError("No content in the response")
     
-    except genai.types.generation_types.BlockedPromptException as e:
-        app.logger.error(f"Blocked prompt: {str(e)}")
-        error_message = "I'm sorry, but I can't respond to that type of question. Please try asking something else."
-        return jsonify({'error': error_message}), 400
-    
     except Exception as e:
         app.logger.error(f"Error generating psychic response: {str(e)}", exc_info=True)
         error_message = "The spirits are unclear at this moment. Please try again later."
@@ -115,6 +114,11 @@ def ask_psychic():
 def past_sessions():
     sessions = current_user.sessions.order_by(Session.timestamp.desc()).all()
     return render_template('past_sessions.html', sessions=sessions)
+
+# Add a test endpoint
+@app.route('/test', methods=['GET'])
+def test_endpoint():
+    return jsonify({'status': 'ok', 'message': 'Test endpoint is working'}), 200
 
 if __name__ == '__main__':
     with app.app_context():
