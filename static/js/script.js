@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM content loaded');
     const questionForm = document.getElementById('question-form');
     const questionInput = document.getElementById('question-input');
     const personalitySelect = document.getElementById('personality-select');
@@ -14,32 +15,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const isSpeechRecognitionSupported = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
     const isSpeechSynthesisSupported = 'speechSynthesis' in window;
 
-    if (!isSpeechRecognitionSupported) {
-        startVoiceInputButton.disabled = true;
-        startVoiceInputButton.textContent = 'Voice Input Not Supported';
-        startVoiceInputButton.classList.add('bg-gray-500');
+    console.log('Speech Recognition supported:', isSpeechRecognitionSupported);
+    console.log('Speech Synthesis supported:', isSpeechSynthesisSupported);
+
+    function updateButtonState(button, isEnabled, enabledText, disabledText, enabledClass, disabledClass) {
+        button.disabled = !isEnabled;
+        button.textContent = isEnabled ? enabledText : disabledText;
+        button.classList.remove(isEnabled ? disabledClass : enabledClass);
+        button.classList.add(isEnabled ? enabledClass : disabledClass);
     }
 
-    if (!isSpeechSynthesisSupported) {
-        toggleSpeechOutputButton.disabled = true;
-        toggleSpeechOutputButton.textContent = 'Speech Output Not Supported';
-        toggleSpeechOutputButton.classList.add('bg-gray-500');
-    }
+    updateButtonState(
+        startVoiceInputButton,
+        isSpeechRecognitionSupported,
+        'Start Voice Input',
+        'Voice Input Not Supported',
+        'bg-blue-600 hover:bg-blue-700',
+        'bg-gray-500'
+    );
+
+    updateButtonState(
+        toggleSpeechOutputButton,
+        isSpeechSynthesisSupported,
+        'Enable Speech Output',
+        'Speech Output Not Supported',
+        'bg-green-600 hover:bg-green-700',
+        'bg-gray-500'
+    );
 
     if (questionForm) {
         questionForm.addEventListener('submit', handleQuestionSubmit);
+        console.log('Question form submit event listener attached');
     }
 
     if (startVoiceInputButton && isSpeechRecognitionSupported) {
         startVoiceInputButton.addEventListener('click', toggleVoiceInput);
+        console.log('Start voice input button click event listener attached');
     }
 
     if (toggleSpeechOutputButton && isSpeechSynthesisSupported) {
         toggleSpeechOutputButton.addEventListener('click', toggleSpeechOutput);
+        console.log('Toggle speech output button click event listener attached');
     }
 
     async function handleQuestionSubmit(e) {
         e.preventDefault();
+        console.log('Question form submitted');
         const question = questionInput.value.trim();
         const personality = personalitySelect.value;
         if (!question) return;
@@ -67,11 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error:', error);
-            displayResponse(question, `An error occurred: ${error.message}. Please try again later.`, 'Error');
+            displayErrorMessage(`An error occurred: ${error.message}. Please try again later.`);
         }
     }
 
     function displayResponse(question, response, personality) {
+        console.log('Displaying response');
         const responseElement = document.createElement('div');
         responseElement.classList.add('psychic-response', 'mb-4', 'p-4', 'bg-purple-900', 'rounded-lg', 'shadow-md');
         responseElement.innerHTML = `
@@ -89,31 +111,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function toggleVoiceInput(e) {
         e.preventDefault();
+        console.log('Toggle voice input clicked');
         if (!recognition) {
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
+            try {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
 
-            recognition.onresult = (event) => {
-                const speechResult = event.results[0][0].transcript;
-                questionInput.value = speechResult;
-                stopVoiceInput();
-                questionForm.dispatchEvent(new Event('submit'));
-            };
+                recognition.onresult = (event) => {
+                    console.log('Speech recognition result received');
+                    const speechResult = event.results[0][0].transcript;
+                    questionInput.value = speechResult;
+                    stopVoiceInput();
+                    questionForm.dispatchEvent(new Event('submit'));
+                };
 
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                stopVoiceInput();
-                displayErrorMessage('Speech recognition error. Please try again.');
-            };
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    stopVoiceInput();
+                    displayErrorMessage('Speech recognition error. Please try again.');
+                };
 
-            recognition.onend = () => {
-                stopVoiceInput();
-            };
+                recognition.onend = () => {
+                    console.log('Speech recognition ended');
+                    stopVoiceInput();
+                };
+            } catch (error) {
+                console.error('Error initializing speech recognition:', error);
+                displayErrorMessage('Failed to initialize speech recognition. Please try again.');
+                return;
+            }
         }
 
-        if (recognition.state === 'inactive') {
+        if (recognition.state !== 'running') {
             startVoiceInput();
         } else {
             stopVoiceInput();
@@ -121,33 +152,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startVoiceInput() {
-        recognition.start();
-        startVoiceInputButton.textContent = 'Stop Voice Input';
-        startVoiceInputButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-        startVoiceInputButton.classList.add('bg-red-600', 'hover:bg-red-700');
-        questionInput.placeholder = 'Listening...';
+        console.log('Starting voice input');
+        try {
+            recognition.start();
+            updateButtonState(
+                startVoiceInputButton,
+                true,
+                'Stop Voice Input',
+                'Start Voice Input',
+                'bg-red-600 hover:bg-red-700',
+                'bg-blue-600 hover:bg-blue-700'
+            );
+            questionInput.placeholder = 'Listening...';
+        } catch (error) {
+            console.error('Error starting voice input:', error);
+            displayErrorMessage('Failed to start voice input. Please try again.');
+        }
     }
 
     function stopVoiceInput() {
-        recognition.stop();
-        startVoiceInputButton.textContent = 'Start Voice Input';
-        startVoiceInputButton.classList.remove('bg-red-600', 'hover:bg-red-700');
-        startVoiceInputButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
-        questionInput.placeholder = 'Ask your question...';
+        console.log('Stopping voice input');
+        try {
+            recognition.stop();
+            updateButtonState(
+                startVoiceInputButton,
+                true,
+                'Start Voice Input',
+                'Start Voice Input',
+                'bg-blue-600 hover:bg-blue-700',
+                'bg-red-600 hover:bg-red-700'
+            );
+            questionInput.placeholder = 'Ask your question...';
+        } catch (error) {
+            console.error('Error stopping voice input:', error);
+            displayErrorMessage('Failed to stop voice input. Please refresh the page and try again.');
+        }
     }
 
     function toggleSpeechOutput(e) {
         e.preventDefault();
+        console.log('Toggle speech output clicked');
         isSpeechOutputEnabled = !isSpeechOutputEnabled;
-        toggleSpeechOutputButton.textContent = isSpeechOutputEnabled ? 'Disable Speech Output' : 'Enable Speech Output';
-        toggleSpeechOutputButton.classList.toggle('bg-green-600');
-        toggleSpeechOutputButton.classList.toggle('bg-red-600');
+        updateButtonState(
+            toggleSpeechOutputButton,
+            true,
+            isSpeechOutputEnabled ? 'Disable Speech Output' : 'Enable Speech Output',
+            'Enable Speech Output',
+            isSpeechOutputEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700',
+            isSpeechOutputEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+        );
     }
 
     function speakResponse(text) {
+        console.log('Speaking response');
         if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            speechSynthesis.speak(utterance);
+            try {
+                const utterance = new SpeechSynthesisUtterance(text);
+                speechSynthesis.speak(utterance);
+            } catch (error) {
+                console.error('Error in speech synthesis:', error);
+                displayErrorMessage('Failed to speak the response. Please try again.');
+            }
         } else {
             console.error('Speech synthesis not supported');
             displayErrorMessage('Speech synthesis is not supported in your browser.');
@@ -155,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayErrorMessage(message) {
+        console.error('Displaying error message:', message);
         const errorElement = document.createElement('div');
         errorElement.classList.add('error-message', 'mb-4', 'p-4', 'bg-red-600', 'rounded-lg', 'shadow-md');
         errorElement.textContent = message;
