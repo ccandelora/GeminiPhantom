@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const responseContainer = document.getElementById('response-container');
     const startVoiceInputButton = document.getElementById('start-voice-input');
     const toggleSpeechOutputButton = document.getElementById('toggle-speech-output');
+    const microphoneIcon = document.createElement('span');
+    microphoneIcon.innerHTML = '🎤';
+    microphoneIcon.classList.add('hidden', 'ml-2', 'animate-pulse');
+    startVoiceInputButton.appendChild(microphoneIcon);
 
     let recognition;
     let speechSynthesis = window.speechSynthesis;
@@ -25,23 +29,35 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.add(isEnabled ? enabledClass : disabledClass);
     }
 
-    updateButtonState(
-        startVoiceInputButton,
-        isSpeechRecognitionSupported,
-        'Start Voice Input',
-        'Voice Input Not Supported',
-        'bg-blue-600 hover:bg-blue-700',
-        'bg-gray-500'
-    );
+    function checkBrowserCompatibility() {
+        if (!isSpeechRecognitionSupported) {
+            console.warn('Speech Recognition is not supported in this browser');
+            displayErrorMessage('Speech Recognition is not supported in this browser. Please use a modern browser like Chrome, Edge, or Safari.');
+            updateButtonState(
+                startVoiceInputButton,
+                false,
+                'Start Voice Input',
+                'Voice Input Not Supported',
+                'bg-blue-600 hover:bg-blue-700',
+                'bg-gray-500'
+            );
+        }
 
-    updateButtonState(
-        toggleSpeechOutputButton,
-        isSpeechSynthesisSupported,
-        'Enable Speech Output',
-        'Speech Output Not Supported',
-        'bg-green-600 hover:bg-green-700',
-        'bg-gray-500'
-    );
+        if (!isSpeechSynthesisSupported) {
+            console.warn('Speech Synthesis is not supported in this browser');
+            displayErrorMessage('Speech Synthesis is not supported in this browser. Please use a modern browser like Chrome, Edge, or Safari.');
+            updateButtonState(
+                toggleSpeechOutputButton,
+                false,
+                'Enable Speech Output',
+                'Speech Output Not Supported',
+                'bg-green-600 hover:bg-green-700',
+                'bg-gray-500'
+            );
+        }
+    }
+
+    checkBrowserCompatibility();
 
     if (questionForm) {
         questionForm.addEventListener('submit', handleQuestionSubmit);
@@ -70,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const personality = personalitySelect.value;
         if (!question) {
             console.log('Empty question, not submitting');
+            displayErrorMessage('Please enter a question before submitting.');
             return;
         }
 
@@ -150,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'bg-blue-600 hover:bg-blue-700'
                 );
                 questionInput.placeholder = 'Listening...';
+                microphoneIcon.classList.remove('hidden');
             };
 
             recognition.onresult = (event) => {
@@ -164,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
                 stopVoiceInput();
-                displayErrorMessage('Speech recognition error. Please try again.');
+                displayErrorMessage(`Speech recognition error: ${event.error}. Please try again.`);
             };
 
             recognition.onend = () => {
@@ -182,9 +200,19 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             questionInput.value = ''; // Clear previous questions
             recognition.start();
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(() => {
+                    console.log('Microphone permission granted');
+                })
+                .catch((error) => {
+                    console.error('Microphone permission denied:', error);
+                    displayErrorMessage('Microphone access is required for voice input. Please grant permission and try again.');
+                    stopVoiceInput();
+                });
         } catch (error) {
             console.error('Error starting voice input:', error);
             displayErrorMessage('Failed to start voice input. Please try again.');
+            stopVoiceInput();
         }
     }
 
@@ -201,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'bg-red-600 hover:bg-red-700'
             );
             questionInput.placeholder = 'Ask your question...';
+            microphoneIcon.classList.add('hidden');
         } catch (error) {
             console.error('Error stopping voice input:', error);
             displayErrorMessage('Failed to stop voice input. Please refresh the page and try again.');
@@ -245,4 +274,43 @@ document.addEventListener('DOMContentLoaded', () => {
         responseContainer.prepend(errorElement);
         errorElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+
+    // Simple test function for Web Speech API
+    function testWebSpeechAPI() {
+        console.log('Testing Web Speech API');
+        if (isSpeechRecognitionSupported) {
+            const testRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            testRecognition.onstart = () => console.log('Test recognition started');
+            testRecognition.onend = () => console.log('Test recognition ended');
+            testRecognition.onerror = (event) => console.error('Test recognition error:', event.error);
+            testRecognition.onresult = (event) => console.log('Test recognition result:', event.results[0][0].transcript);
+            
+            try {
+                testRecognition.start();
+                setTimeout(() => testRecognition.stop(), 5000); // Stop after 5 seconds
+            } catch (error) {
+                console.error('Error in test recognition:', error);
+            }
+        } else {
+            console.error('Speech Recognition is not supported for testing');
+        }
+
+        if (isSpeechSynthesisSupported) {
+            const testUtterance = new SpeechSynthesisUtterance('This is a test of speech synthesis.');
+            testUtterance.onstart = () => console.log('Test synthesis started');
+            testUtterance.onend = () => console.log('Test synthesis ended');
+            testUtterance.onerror = (event) => console.error('Test synthesis error:', event.error);
+            
+            try {
+                speechSynthesis.speak(testUtterance);
+            } catch (error) {
+                console.error('Error in test synthesis:', error);
+            }
+        } else {
+            console.error('Speech Synthesis is not supported for testing');
+        }
+    }
+
+    // Run the test function
+    testWebSpeechAPI();
 });
