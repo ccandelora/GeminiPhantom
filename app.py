@@ -1,18 +1,39 @@
 import os
+import time
+from functools import wraps
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import google.generativeai as genai
 from models import db, User, Session
 import logging
 import random
-from sqlalchemy.exc import DataError
+from sqlalchemy.exc import DataError, OperationalError
+from config import Config  # Import the Config class
+
+def retry_on_exception(retries=3, backoff_in_seconds=1):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            x = 0
+            while True:
+                try:
+                    return f(*args, **kwargs)
+                except OperationalError as e:
+                    if x == retries:
+                        raise
+                    else:
+                        x += 1
+                        time.sleep(backoff_in_seconds * 2 ** x)
+        return wrapper
+    return decorator
 
 app = Flask(__name__)
 
 # Load configuration
-app.config.from_object('config.Config')
+app.config.from_object(Config)
 
-# Initialize database
+# Initialize database with new configuration options
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = Config.SQLALCHEMY_ENGINE_OPTIONS
 db.init_app(app)
 
 # Initialize LoginManager
@@ -21,6 +42,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 @login_manager.user_loader
+@retry_on_exception(retries=3)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
@@ -97,6 +119,7 @@ def logout():
 
 @app.route('/ask', methods=['POST'])
 @login_required
+@retry_on_exception(retries=3)
 def ask_psychic():
     question = request.json['question']
     personality_key = request.json.get('personality', 'random')
