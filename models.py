@@ -24,3 +24,4 @@ class Session(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     question = db.Column(db.String(255), nullable=False)
     response = db.Column(db.Text, nullable=False)
+    personality = db.Column(db.String(64), nullable=False)  # New field for storing the personality
