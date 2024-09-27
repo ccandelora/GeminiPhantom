@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import google.generativeai as genai
+from google.generativeai.types import GenerateContentResponse
 from models import db, User, Session
 import logging
 
@@ -79,16 +80,14 @@ def ask_psychic():
     question = request.json['question']
     
     try:
-        # Prompt engineering for psychic medium simulation
         prompt = f"As a psychic medium, provide a mystical and intuitive response to the following question: '{question}'. Be vague yet comforting, and use language that a psychic medium might use."
         
         response = model.generate_content(prompt)
         
-        # Check if the response has content
-        if response.text:
+        if isinstance(response, GenerateContentResponse):
             answer = response.text
         else:
-            raise ValueError("Empty response from Gemini API")
+            raise ValueError("Unexpected response type from Gemini API")
         
         # Save the session
         session = Session(user_id=current_user.id, question=question, response=answer)
