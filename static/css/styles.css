@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Spectral:wght@400;600&display=swap');
 
 body {
-    background-image: url('../images/mystical-background.jpg');
+    background-image: url('/static/images/mystical-background.jpg');
     background-size: cover;
     background-attachment: fixed;
     font-family: 'Spectral', serif;
@@ -76,7 +76,7 @@ body {
 /* Custom dropdown */
 select {
     appearance: none;
-    background-image: url('../images/moon-phase.svg');
+    background-image: url('/static/images/moon-phase.svg');
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1.5em;

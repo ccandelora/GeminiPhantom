@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         starField.appendChild(star);
     }
 
+    // Check if fog and candle-flame elements exist
+    console.log('Fog element:', document.querySelector('.fog'));
+    console.log('Candle flames:', document.querySelectorAll('.candle-flame'));
+
     async function handleFormSubmit(e) {
         e.preventDefault();
         const question = questionInput.value.trim();
