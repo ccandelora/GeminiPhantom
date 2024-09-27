@@ -1,0 +1,60 @@
+~/GeminiPhantom$ update_db_schema.py
+bash: update_db_schema.py: command not found
+~/GeminiPhantom$ ls
+ app.py
+ config.py
+ generated-icon.png
+ main.py
+ migrations
+ models.py
+ node_modules
+ package.json
+ package-lock.json
+ Pasted-DataError-sqlalchemy-exc-DataError-psycopg2-errors-StringDataRightTruncation-value-too-long-for-t-1727441148784.txt
+ Pasted-INFO-app-Received-question-What-does-my-future-hold-INFO-app-Sending-request-to-Gemini-API-INFO-ap-1727465313607.txt
+ Pasted-INFO-app-Received-question-What-does-my-future-hold-INFO-app-Sending-request-to-Gemini-API-INFO-ap-1727465425958.txt
+ Pasted-TemplateNotFound-jinja2-exceptions-TemplateNotFound-base-html-Traceback-most-recent-call-last-Fi-1727441014639.txt
+ poetry.lock
+ postcss.config.js
+ __pycache__
+ pyproject.toml
+ replit.nix
+'Screenshot 2024-09-27 at 2.52.42 PM.png'
+'Screenshot 2024-09-27 at 8.47.55 AM.png'
+'Screenshot 2024-09-27 at 9.01.32 AM.png'
+ static
+ tailwind.config.js
+ templates
+ update_db_schema.py
+~/GeminiPhantom$ update_db_schema.py
+bash: update_db_schema.py: command not found
+~/GeminiPhantom$ run update_db_schema.py
+run: command not installed. Multiple versions of this command were found in Nix.
+Select one to run (or press Ctrl-C to cancel):
+run      0.11.2  Easily manage and invoke small scripts and wrappers
+/nix/store/s6d6bnf7yvmb33b3af2svnx4n3aijdpn-run-0.11.2
+Adding run to replit.nix
+success
+run: ERROR: runfile 'Runfile' not found: please create the file or specify an alternative
+
+ Environment rebuilding in the background...
+~/GeminiPhantom$ python update_db_schema.py
+Traceback (most recent call last):
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/click/globals.py", line 37, in get_current_context
+    return t.cast("Context", _local.stack[-1])
+                             ^^^^^^^^^^^^
+AttributeError: '_thread._local' object has no attribute 'stack'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/GeminiPhantom/update_db_schema.py", line 102, in <module>
+    run_migrations()
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/click/decorators.py", line 33, in new_func
+    return f(get_current_context(), *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/click/globals.py", line 40, in get_current_context
+    raise RuntimeError("There is no active click context.") from e
+RuntimeError: There is no active click context.
+ Environment updated. Reloading shell...
+~/GeminiPhantom$ 

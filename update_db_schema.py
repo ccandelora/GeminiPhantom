@@ -4,7 +4,6 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade, init, stamp
-from flask.cli import with_appcontext
 from sqlalchemy import inspect, text
 
 # Configure logging
@@ -41,7 +40,6 @@ def log_database_schema(message):
         for column in inspector.get_columns(table_name):
             logging.info(f"  Column: {column['name']} (Type: {column['type']})")
 
-@with_appcontext
 def run_migrations():
     logging.info("Starting migration process...")
     
@@ -63,16 +61,10 @@ def run_migrations():
             stamp('head')
 
         logging.info("Creating new migration...")
-        with app.app_context():
-            try:
-                migrate_obj = Migrate(app, db)
-                migrate_obj.init_app(app, db)
-                migrate_obj.migrate()
-                logging.info("Migration created successfully.")
-            except Exception as migration_error:
-                logging.error(f"Error creating migration: {str(migration_error)}")
-                logging.error(traceback.format_exc())
-                return
+        migrate_obj = Migrate(app, db)
+        migrate_obj.init_app(app, db)
+        migrate_obj.migrate()
+        logging.info("Migration created successfully.")
 
         logging.info("Applying migration...")
         upgrade()
