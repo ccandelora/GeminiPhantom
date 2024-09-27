@@ -1,68 +1,75 @@
 /* Custom styles on top of Tailwind CSS */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Spectral:wght@400;600&display=swap');
+
 body {
     background-image: url('../images/mystical-background.jpg');
     background-size: cover;
     background-attachment: fixed;
+    font-family: 'Spectral', serif;
 }
 
+/* Fog animation */
+@keyframes fog {
+    0% { transform: translateX(-100%); opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { transform: translateX(100%); opacity: 0; }
+}
+
+.fog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background-image: url('../images/fog.png');
+    background-size: contain;
+    animation: fog 60s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Floating symbols */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+.floating-symbol {
+    position: fixed;
+    opacity: 0.3;
+    animation: float 10s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Crystal ball */
 .crystal-ball {
-    animation: glow 2s infinite alternate;
+    animation: glow 2s infinite alternate, swirl 10s linear infinite;
 }
 
 @keyframes glow {
-    from {
-        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
-    }
-    to {
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
-    }
+    from { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7)); }
+    to { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)); }
 }
 
-.psychic-response {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-    background: rgba(76, 29, 149, 0.7);
-    border: 1px solid #8b5cf6;
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
-}
-
-.psychic-response.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.hidden {
-    display: none;
-}
-
-.spinner {
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top: 4px solid #ffffff;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
+@keyframes swirl {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-.mystic-input {
+/* UI Elements */
+.mystic-input, .mystic-button {
     background: rgba(30, 27, 75, 0.7);
     border: 1px solid #6d28d9;
     transition: all 0.3s ease;
 }
 
-.mystic-input:focus {
-    box-shadow: 0 0 10px #8b5cf6;
+.mystic-input:focus, .mystic-button:focus, .mystic-button:hover {
+    box-shadow: 0 0 15px #8b5cf6;
 }
 
 .mystic-button {
     background: linear-gradient(45deg, #6d28d9, #8b5cf6);
-    transition: all 0.3s ease;
 }
 
 .mystic-button:hover {
@@ -70,17 +77,67 @@ body {
     transform: scale(1.05);
 }
 
-.tarot-card {
-    width: 100px;
-    height: 150px;
-    background-image: url('../images/tarot-back.jpg');
-    background-size: cover;
-    position: absolute;
-    transition: all 0.5s ease;
+/* Custom dropdown */
+select {
+    appearance: none;
+    background-image: url('../images/moon-phase.svg');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.5em;
 }
 
-#tarot-spread {
-    height: 200px;
-    position: relative;
-    margin-bottom: 2rem;
+/* Psychic response animation */
+@keyframes materialize {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.psychic-response {
+    animation: materialize 1s ease-out;
+    background: rgba(76, 29, 149, 0.7);
+    border: 1px solid #8b5cf6;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}
+
+/* Floating text animation */
+@keyframes float-text {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
+}
+
+.float-text {
+    animation: float-text 3s ease-in-out infinite;
+}
+
+/* Candle flames */
+.candle-flame {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/candle-flame.gif');
+    background-size: contain;
+    pointer-events: none;
+}
+
+/* Star field */
+@keyframes twinkle {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.star {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite;
+    pointer-events: none;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
 }

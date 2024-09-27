@@ -9,6 +9,32 @@ document.addEventListener('DOMContentLoaded', () => {
         questionForm.addEventListener('submit', handleFormSubmit);
     }
 
+    // Add floating symbols
+    const floatingSymbols = document.getElementById('floating-symbols');
+    const symbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '☽', '☀', '★'];
+    for (let i = 0; i < 20; i++) {
+        const symbol = document.createElement('div');
+        symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        symbol.className = 'floating-symbol';
+        symbol.style.left = `${Math.random() * 100}vw`;
+        symbol.style.top = `${Math.random() * 100}vh`;
+        symbol.style.animationDuration = `${10 + Math.random() * 10}s`;
+        symbol.style.animationDelay = `-${Math.random() * 10}s`;
+        floatingSymbols.appendChild(symbol);
+    }
+
+    // Add star field
+    const starField = document.getElementById('star-field');
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = `${Math.random() * 100}vw`;
+        star.style.top = `${Math.random() * 100}vh`;
+        star.style.animationDuration = `${1 + Math.random() * 2}s`;
+        star.style.animationDelay = `-${Math.random() * 2}s`;
+        starField.appendChild(star);
+    }
+
     async function handleFormSubmit(e) {
         e.preventDefault();
         const question = questionInput.value.trim();
