@@ -98,11 +98,15 @@ def logout():
 @login_required
 def ask_psychic():
     question = request.json['question']
-    personality_key = request.json.get('personality', random.choice(list(PSYCHIC_PERSONALITIES.keys())))
-    personality = PSYCHIC_PERSONALITIES[personality_key]
+    personality_key = request.json.get('personality', 'random')
     
     try:
         app.logger.info(f"Received question: {question}")
+        
+        if personality_key == 'random':
+            personality_key = random.choice(list(PSYCHIC_PERSONALITIES.keys()))
+        
+        personality = PSYCHIC_PERSONALITIES[personality_key]
         prompt = personality['prompt'].format(question=question)
         
         app.logger.info("Sending request to Gemini API")
