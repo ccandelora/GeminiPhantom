@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import google.generativeai as genai
 from models import db, User, Session
+import logging
 
 app = Flask(__name__)
 
@@ -24,6 +25,9 @@ def load_user(user_id):
 # Configure Google Gemini API
 genai.configure(api_key=app.config['GEMINI_API_KEY'])
 model = genai.GenerativeModel('gemini-pro')
+
+# Configure logging
+logging.basicConfig(level=logging.ERROR)
 
 @app.route('/')
 def index():
@@ -74,17 +78,29 @@ def logout():
 def ask_psychic():
     question = request.json['question']
     
-    # Prompt engineering for psychic medium simulation
-    prompt = f"As a psychic medium, provide a mystical and intuitive response to the following question: '{question}'. Be vague yet comforting, and use language that a psychic medium might use."
+    try:
+        # Prompt engineering for psychic medium simulation
+        prompt = f"As a psychic medium, provide a mystical and intuitive response to the following question: '{question}'. Be vague yet comforting, and use language that a psychic medium might use."
+        
+        response = model.generate_content(prompt)
+        
+        # Check if the response has content
+        if response.text:
+            answer = response.text
+        else:
+            raise ValueError("Empty response from Gemini API")
+        
+        # Save the session
+        session = Session(user_id=current_user.id, question=question, response=answer)
+        db.session.add(session)
+        db.session.commit()
+        
+        return jsonify({'response': answer})
     
-    response = model.generate_content(prompt)
-    
-    # Save the session
-    session = Session(user_id=current_user.id, question=question, response=response.text)
-    db.session.add(session)
-    db.session.commit()
-    
-    return jsonify({'response': response.text})
+    except Exception as e:
+        app.logger.error(f"Error generating psychic response: {str(e)}")
+        fallback_response = "The spirits are unclear at this moment. Please try again later."
+        return jsonify({'response': fallback_response}), 500
 
 @app.route('/past_sessions')
 @login_required
