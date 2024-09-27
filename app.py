@@ -101,10 +101,12 @@ def logout():
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 def generate_psychic_response(prompt):
     try:
+        app.logger.info(f"Generating response for prompt: {prompt}")
         response = model.generate_content(prompt)
+        app.logger.info(f"Generated response: {response.text}")
         return response.text
     except Exception as e:
-        app.logger.error(f"Error generating response from Gemini API: {str(e)}")
+        app.logger.error(f"Error generating response from Gemini API: {str(e)}", exc_info=True)
         raise
 
 @app.route('/ask', methods=['POST'])
@@ -127,8 +129,8 @@ def ask_psychic():
             answer = generate_psychic_response(prompt)
             app.logger.info(f"Received response from Gemini API: {answer}")
         except Exception as api_error:
-            app.logger.error(f"Gemini API error after retries: {str(api_error)}")
-            raise
+            app.logger.error(f"Gemini API error after retries: {str(api_error)}", exc_info=True)
+            return jsonify({'error': "The spirits are having trouble connecting. Please try again later."}), 500
 
         session = Session(user_id=current_user.id, question=question, response=answer, personality=personality_name)
         db.session.add(session)
@@ -138,9 +140,9 @@ def ask_psychic():
         return jsonify({'response': answer, 'personality': personality['name']})
     
     except Exception as e:
-        app.logger.error(f"Error generating psychic response: {str(e)}", exc_info=True)
-        error_message = "The spirits are unclear at this moment. Please try again later."
-        return jsonify({'error': error_message}), 500
+        app.logger.error(f"Error in ask_psychic: {str(e)}", exc_info=True)
+        db.session.rollback()
+        return jsonify({'error': "An unexpected error occurred. The spirits are momentarily silent."}), 500
 
 @app.route('/past_sessions')
 @login_required
