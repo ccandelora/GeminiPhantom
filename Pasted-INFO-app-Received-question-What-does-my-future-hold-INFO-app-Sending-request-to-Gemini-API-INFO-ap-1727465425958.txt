@@ -1,0 +1,139 @@
+INFO:app:Received question: What does my future hold?
+INFO:app:Sending request to Gemini API
+INFO:app:Received response from Gemini API: response:
+GenerateContentResponse(
+    done=True,
+    iterator=None,
+    result=protos.GenerateContentResponse({
+      "candidates": [
+        {
+          "content": {
+            "parts": [
+              {
+                "text": "**The Wheel of Fortune** spins, casting its enigmatic influence upon thy destiny. Karma's threads entwine, shaping a tapestry where past actions resonate in present occurrences. The future is a realm of infinite possibilities, veiled by the mists of uncertainty.\n\nThe **Star** shimmers in the celestial expanse, offering hope amidst the darkness. Its radiant light guides thee toward a path of fulfillment, where dreams take flight and inspiration flows freely. Embrace the blessings bestowed upon thee, as they shall illuminate thy way.\n\nHowever, the **Tower** looms on the horizon, a symbol of unexpected upheaval and transformation. Its presence suggests that seismic shifts are on the cusp of unfolding, bringing forth both trials and opportunities. Be prepared to shed outdated beliefs and embrace new paradigms.\n\nThe **Magician** stands poised with arcane prowess, symbolizing thy latent abilities and untapped potential. This card calls upon thee to manifest thy desires through focused intention and unwavering belief. The universe stands ready to assist, but it is thy own actions that shall shape the outcome.\n\nRemember, the cards speak not of absolute destinies, but of potentialities that may unfold based upon thy choices. Embrace the wisdom they convey, and forge thy path with intention, mindful of the karmic echoes that may reverberate from past deeds."
+              }
+            ],
+            "role": "model"
+          },
+          "finish_reason": "STOP",
+          "index": 0,
+          "safety_ratings": [
+            {
+              "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HATE_SPEECH",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HARASSMENT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+              "probability": "NEGLIGIBLE"
+            }
+          ]
+        }
+      ],
+      "usage_metadata": {
+        "prompt_token_count": 62,
+        "candidates_token_count": 258,
+        "total_token_count": 320
+      }
+    }),
+)
+INFO:app:Processed answer: **The Wheel of Fortune** spins, casting its enigmatic influence upon thy destiny. Karma's threads entwine, shaping a tapestry where past actions resonate in present occurrences. The future is a realm of infinite possibilities, veiled by the mists of uncertainty.
+
+The **Star** shimmers in the celestial expanse, offering hope amidst the darkness. Its radiant light guides thee toward a path of fulfillment, where dreams take flight and inspiration flows freely. Embrace the blessings bestowed upon thee, as they shall illuminate thy way.
+
+However, the **Tower** looms on the horizon, a symbol of unexpected upheaval and transformation. Its presence suggests that seismic shifts are on the cusp of unfolding, bringing forth both trials and opportunities. Be prepared to shed outdated beliefs and embrace new paradigms.
+
+The **Magician** stands poised with arcane prowess, symbolizing thy latent abilities and untapped potential. This card calls upon thee to manifest thy desires through focused intention and unwavering belief. The universe stands ready to assist, but it is thy own actions that shall shape the outcome.
+
+Remember, the cards speak not of absolute destinies, but of potentialities that may unfold based upon thy choices. Embrace the wisdom they convey, and forge thy path with intention, mindful of the karmic echoes that may reverberate from past deeds.
+ERROR:app:Error in ask_psychic: (psycopg2.errors.UndefinedColumn) column "personality" of relation "session" does not exist
+LINE 1: ... session (user_id, timestamp, question, response, personalit...
+                                                             ^
+
+[SQL: INSERT INTO session (user_id, timestamp, question, response, personality) VALUES (%(user_id)s, %(timestamp)s, %(question)s, %(response)s, %(personality)s) RETURNING session.id]
+[parameters: {'user_id': 3, 'timestamp': datetime.datetime(2024, 9, 27, 19, 29, 54, 137673), 'question': 'What does my future hold?', 'response': "**The Wheel of Fortune** spins, casting its enigmatic influence upon thy destiny. Karma's threads entwine, shaping a tapestry where past actions reso ... (1079 characters truncated) ... on thy choices. Embrace the wisdom they convey, and forge thy path with intention, mindful of the karmic echoes that may reverberate from past deeds.", 'personality': 'Tarot Master'}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column "personality" of relation "session" does not exist
+LINE 1: ... session (user_id, timestamp, question, response, personalit...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/GeminiPhantom/app.py", line 127, in ask_psychic
+    db.session.commit()
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2028, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4352, in flush
+    self._flush(objects)
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4487, in _flush
+    with util.safe_reraise():
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4448, in _flush
+    flush_context.execute()
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column "personality" of relation "session" does not exist
+LINE 1: ... session (user_id, timestamp, question, response, personalit...
+                                                             ^
+
+[SQL: INSERT INTO session (user_id, timestamp, question, response, personality) VALUES (%(user_id)s, %(timestamp)s, %(question)s, %(response)s, %(personality)s) RETURNING session.id]
+[parameters: {'user_id': 3, 'timestamp': datetime.datetime(2024, 9, 27, 19, 29, 54, 137673), 'question': 'What does my future hold?', 'response': "**The Wheel of Fortune** spins, casting its enigmatic influence upon thy destiny. Karma's threads entwine, shaping a tapestry where past actions reso ... (1079 characters truncated) ... on thy choices. Embrace the wisdom they convey, and forge thy path with intention, mindful of the karmic echoes that may reverberate from past deeds.", 'personality': 'Tarot Master'}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:29:54] "POST /ask HTTP/1.1" 500 -
