@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">Past Sessions</h2>
+    {% if sessions %}
+        <div class="space-y-4">
+        {% for session in sessions %}
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <p class="text-sm text-gray-400">{{ session.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p class="font-semibold mt-2">Q: {{ session.question }}</p>
+                <p class="mt-2">A: {{ session.response }}</p>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p>You haven't had any psychic sessions yet.</p>
+    {% endif %}
+    <a href="{{ url_for('index') }}" class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Back to Home</a>
+</div>
+{% endblock %}
