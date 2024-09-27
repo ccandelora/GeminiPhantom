@@ -4,6 +4,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade, init, stamp, revision
+from sqlalchemy import text
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -18,7 +19,7 @@ migrate = Migrate(app, db)
 
 def check_database_connection():
     try:
-        db.session.execute("SELECT 1")
+        db.session.execute(text("SELECT 1"))
         logging.info("Database connection successful.")
         return True
     except Exception as db_error:
@@ -79,7 +80,7 @@ def run_migrations():
             logging.info("Attempting manual column addition...")
             try:
                 with db.engine.connect() as connection:
-                    connection.execute("ALTER TABLE session ADD COLUMN personality VARCHAR(64)")
+                    connection.execute(text("ALTER TABLE session ADD COLUMN personality VARCHAR(64)"))
                 logging.info("Manual column addition successful.")
             except Exception as manual_add_error:
                 logging.error(f"Error in manual column addition: {str(manual_add_error)}")

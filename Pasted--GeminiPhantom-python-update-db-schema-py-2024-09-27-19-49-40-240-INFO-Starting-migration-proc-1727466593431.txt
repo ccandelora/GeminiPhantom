@@ -1,0 +1,29 @@
+~/GeminiPhantom$ python update_db_schema.py
+2024-09-27 19:49:40,240 - INFO - Starting migration process...
+2024-09-27 19:49:40,240 - ERROR - Database connection error: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')
+2024-09-27 19:49:40,256 - ERROR - Traceback (most recent call last):
+  File "/home/runner/GeminiPhantom/update_db_schema.py", line 21, in check_database_connection
+    db.session.execute("SELECT 1")
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 778, in execute
+    return self._proxied.execute(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2145, in _execute_internal
+    statement = coercions.expect(roles.StatementRole, statement)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/coercions.py", line 396, in expect
+    resolved = impl._literal_coercion(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/coercions.py", line 622, in _literal_coercion
+    return self._text_coercion(element, argname, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/coercions.py", line 615, in _text_coercion
+    return _no_text_coercion(element, argname)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/coercions.py", line 585, in _no_text_coercion
+    raise exc_cls(
+sqlalchemy.exc.ArgumentError: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')
+
+2024-09-27 19:49:40,256 - ERROR - Unable to connect to the database. Please check your database configuration.
