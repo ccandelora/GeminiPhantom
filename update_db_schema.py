@@ -5,7 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade, init, stamp
 from flask.cli import with_appcontext
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -20,7 +20,7 @@ migrate = Migrate(app, db)
 
 def check_database_connection():
     try:
-        db.session.execute("SELECT 1")
+        db.session.execute(text("SELECT 1"))
         logging.info("Database connection successful.")
         return True
     except Exception as db_error:
@@ -33,41 +33,66 @@ def verify_column_exists(table_name, column_name):
     columns = inspector.get_columns(table_name)
     return any(col['name'] == column_name for col in columns)
 
+def log_database_schema(message):
+    logging.info(message)
+    inspector = inspect(db.engine)
+    for table_name in inspector.get_table_names():
+        logging.info(f"Table: {table_name}")
+        for column in inspector.get_columns(table_name):
+            logging.info(f"  Column: {column['name']} (Type: {column['type']})")
+
 @with_appcontext
 def run_migrations():
+    logging.info("Starting migration process...")
+    
     if not check_database_connection():
         logging.error("Unable to connect to the database. Please check your database configuration.")
         return
+
+    log_database_schema("Current database schema:")
 
     if verify_column_exists('session', 'personality'):
         logging.info("'personality' column already exists in the 'session' table.")
         return
 
     try:
-        logging.info("Starting migration process...")
-        
+        logging.info("Initializing migration...")
         if not os.path.exists('migrations'):
-            logging.info("Initializing migrations...")
+            logging.info("Creating migrations directory...")
             init()
             stamp('head')
-        
+
         logging.info("Creating new migration...")
-        migrate_obj = Migrate(app, db)
         with app.app_context():
-            migrate_obj.init_app(app, db)
-            migrate_obj.migrate()
-        
+            try:
+                migrate_obj = Migrate(app, db)
+                migrate_obj.init_app(app, db)
+                migrate_obj.migrate()
+                logging.info("Migration created successfully.")
+            except Exception as migration_error:
+                logging.error(f"Error creating migration: {str(migration_error)}")
+                logging.error(traceback.format_exc())
+                return
+
         logging.info("Applying migration...")
         upgrade()
-        
-        logging.info("Migration completed. Verifying changes...")
-        
+
+        logging.info("Verifying changes...")
         if verify_column_exists('session', 'personality'):
             logging.info("'personality' column successfully added to the 'session' table.")
         else:
             logging.error("'personality' column was not added to the 'session' table.")
-            logging.error("Please check the migration file and database permissions.")
-        
+            logging.info("Attempting manual column addition...")
+            try:
+                with db.engine.connect() as connection:
+                    connection.execute(text("ALTER TABLE session ADD COLUMN personality VARCHAR(64)"))
+                logging.info("Manual column addition successful.")
+            except Exception as manual_add_error:
+                logging.error(f"Error in manual column addition: {str(manual_add_error)}")
+                logging.error(traceback.format_exc())
+
+        log_database_schema("Updated database schema:")
+
     except Exception as e:
         logging.error(f"An error occurred during migration: {str(e)}")
         logging.error(traceback.format_exc())

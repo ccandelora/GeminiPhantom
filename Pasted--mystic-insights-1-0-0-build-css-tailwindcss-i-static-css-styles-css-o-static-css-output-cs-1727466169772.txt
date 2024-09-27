@@ -1,0 +1,172 @@
+> mystic-insights@1.0.0 build-css
+> tailwindcss -i ./static/css/styles.css -o ./static/css/output.css --minify
+
+
+Rebuilding...
+
+Done in 300ms.
+CSS built successfully
+ * Serving Flask app 'app'
+ * Debug mode: on
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.196.149:5000
+INFO:werkzeug:Press CTRL+C to quit
+INFO:werkzeug: * Restarting with stat
+
+> mystic-insights@1.0.0 build-css
+> tailwindcss -i ./static/css/styles.css -o ./static/css/output.css --minify
+
+
+Rebuilding...
+
+Done in 303ms.
+CSS built successfully
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 330-468-868
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:07] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:07] "GET /static/js/script.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:07] "GET /static/images/crystal-ball.svg HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:07] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:08] "GET /static/images/fog.png HTTP/1.1" 404 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:08] "GET /static/images/candle-flame.gif HTTP/1.1" 404 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:08] "GET /static/images/mystical-background.jpg HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:19] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:19] "GET /static/js/script.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:19] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:19] "GET /static/images/crystal-ball.svg HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:20] "GET /static/images/fog.png HTTP/1.1" 404 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:20] "GET /static/images/candle-flame.gif HTTP/1.1" 404 -
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:20] "GET /static/images/mystical-background.jpg HTTP/1.1" 304 -
+INFO:app:Received question: What does my future hold?
+INFO:app:Sending request to Gemini API
+INFO:app:Received response from Gemini API: response:
+GenerateContentResponse(
+    done=True,
+    iterator=None,
+    result=protos.GenerateContentResponse({
+      "candidates": [
+        {
+          "content": {
+            "parts": [
+              {
+                "text": "The threads of your destiny weave a tapestry of both light and shadow, my seeker. I sense a crossroads approaching, where paths diverge like rivers meeting the sea. Choose wisely, for your decisions will shape the tapestry's design. A figure emerges from the mist, bearing a gift that could illuminate your path or lead you astray. Trust your instincts, but remain vigilant, for appearances can deceive. Remember, the future is a delicate dance, its steps influenced by every choice you make. Embrace the unknown with both curiosity and caution, and may the stars guide your journey."
+              }
+            ],
+            "role": "model"
+          },
+          "finish_reason": "STOP",
+          "index": 0,
+          "safety_ratings": [
+            {
+              "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HATE_SPEECH",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_HARASSMENT",
+              "probability": "NEGLIGIBLE"
+            },
+            {
+              "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+              "probability": "NEGLIGIBLE"
+            }
+          ]
+        }
+      ],
+      "usage_metadata": {
+        "prompt_token_count": 64,
+        "candidates_token_count": 114,
+        "total_token_count": 178
+      }
+    }),
+)
+INFO:app:Processed answer: The threads of your destiny weave a tapestry of both light and shadow, my seeker. I sense a crossroads approaching, where paths diverge like rivers meeting the sea. Choose wisely, for your decisions will shape the tapestry's design. A figure emerges from the mist, bearing a gift that could illuminate your path or lead you astray. Trust your instincts, but remain vigilant, for appearances can deceive. Remember, the future is a delicate dance, its steps influenced by every choice you make. Embrace the unknown with both curiosity and caution, and may the stars guide your journey.
+ERROR:app:Error in ask_psychic: (psycopg2.errors.UndefinedColumn) column "personality" of relation "session" does not exist
+LINE 1: ... session (user_id, timestamp, question, response, personalit...
+                                                             ^
+
+[SQL: INSERT INTO session (user_id, timestamp, question, response, personality) VALUES (%(user_id)s, %(timestamp)s, %(question)s, %(response)s, %(personality)s) RETURNING session.id]
+[parameters: {'user_id': 3, 'timestamp': datetime.datetime(2024, 9, 27, 19, 42, 27, 356717), 'question': 'What does my future hold?', 'response': "The threads of your destiny weave a tapestry of both light and shadow, my seeker. I sense a crossroads approaching, where paths diverge like rivers m ... (285 characters truncated) ... cate dance, its steps influenced by every choice you make. Embrace the unknown with both curiosity and caution, and may the stars guide your journey.", 'personality': 'Fortune Teller'}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column "personality" of relation "session" does not exist
+LINE 1: ... session (user_id, timestamp, question, response, personalit...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/GeminiPhantom/app.py", line 127, in ask_psychic
+    db.session.commit()
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2028, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4352, in flush
+    self._flush(objects)
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4487, in _flush
+    with util.safe_reraise():
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4448, in _flush
+    flush_context.execute()
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/GeminiPhantom/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column "personality" of relation "session" does not exist
+LINE 1: ... session (user_id, timestamp, question, response, personalit...
+                                                             ^
+
+[SQL: INSERT INTO session (user_id, timestamp, question, response, personality) VALUES (%(user_id)s, %(timestamp)s, %(question)s, %(response)s, %(personality)s) RETURNING session.id]
+[parameters: {'user_id': 3, 'timestamp': datetime.datetime(2024, 9, 27, 19, 42, 27, 356717), 'question': 'What does my future hold?', 'response': "The threads of your destiny weave a tapestry of both light and shadow, my seeker. I sense a crossroads approaching, where paths diverge like rivers m ... (285 characters truncated) ... cate dance, its steps influenced by every choice you make. Embrace the unknown with both curiosity and caution, and may the stars guide your journey.", 'personality': 'Fortune Teller'}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+INFO:werkzeug:172.31.196.149 - - [27/Sep/2024 19:42:27] "POST /ask HTTP/1.1" 500 -
