@@ -85,7 +85,10 @@ def ask_psychic():
         response = model.generate_content(prompt)
         
         if isinstance(response, GenerateContentResponse):
-            answer = response.text
+            if response.text:
+                answer = response.text
+            else:
+                raise ValueError("No content in the response")
         else:
             raise ValueError(f"Unexpected response type from Gemini API: {type(response)}")
         
@@ -98,7 +101,7 @@ def ask_psychic():
     
     except Exception as e:
         app.logger.error(f"Error generating psychic response: {str(e)}")
-        error_message = f"An error occurred: {str(e)}"
+        error_message = "The spirits are unclear at this moment. Please try again later."
         return jsonify({'error': error_message}), 500
 
 @app.route('/past_sessions')
