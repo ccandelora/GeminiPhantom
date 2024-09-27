@@ -103,6 +103,7 @@ def ask_psychic():
     try:
         app.logger.info(f"Received question: {question}")
         app.logger.info(f"Selected personality: {personality_key}")
+        app.logger.info(f"Question length: {len(question)}")
         
         if personality_key == 'random':
             personality_key = random.choice(list(PSYCHIC_PERSONALITIES.keys()))
@@ -127,6 +128,7 @@ def ask_psychic():
         if response.parts:
             answer = response.text
             app.logger.info(f"Processed answer: {answer}")
+            app.logger.info(f"Response length: {len(answer)}")
             
             # Save the session
             session = Session(user_id=current_user.id, question=question, response=answer, personality=personality['name'])
@@ -152,4 +154,4 @@ def past_sessions():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)

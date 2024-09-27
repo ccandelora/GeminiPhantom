@@ -22,6 +22,6 @@ class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    question = db.Column(db.String(255), nullable=False)
+    question = db.Column(db.Text, nullable=False)  # Changed from String(255) to Text
     response = db.Column(db.Text, nullable=False)
     personality = db.Column(db.String(64), nullable=False)
