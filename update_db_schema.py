@@ -1,6 +1,7 @@
 import logging
 import traceback
 import os
+import sys
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade, init, stamp, revision
@@ -49,6 +50,47 @@ def apply_migration():
 def init_migration():
     if not os.path.exists('migrations'):
         logging.info("Initializing migration environment...")
+        os.makedirs('migrations', exist_ok=True)
+        with open('migrations/alembic.ini', 'w') as f:
+            f.write('''
+[alembic]
+script_location = migrations
+sqlalchemy.url = %(DATABASE_URL)s
+
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+            ''')
         init()
         stamp('head')
     else:
