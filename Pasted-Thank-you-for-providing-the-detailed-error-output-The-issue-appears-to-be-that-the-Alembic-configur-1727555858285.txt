@@ -1,0 +1,62 @@
+Thank you for providing the detailed error output. The issue appears to be that the Alembic configuration file (`alembic.ini`) is missing from your project's `migrations` directory. This file is essential for Alembic, the database migration tool used by Flask-Migrate, to function properly.
+
+To resolve this issue and run the migration successfully, follow these steps:
+
+1. Initialize the migration environment:
+   If you haven't already done so, you need to initialize the migration environment for your project. Run the following command in your project's root directory:
+
+   ```
+   flask db init
+   ```
+
+   This command should create a `migrations` folder with the necessary files, including `alembic.ini`.
+
+2. Check the `migrations` folder:
+   After running `flask db init`, verify that the `migrations` folder contains the following:
+   - An `alembic.ini` file
+   - A `versions` subfolder
+   - An `env.py` file
+
+3. Create a migration:
+   Once the migration environment is properly initialized, create a new migration:
+
+   ```
+   flask db migrate -m "Add personality column to session table"
+   ```
+
+4. Apply the migration:
+   After creating the migration, apply it to your database:
+
+   ```
+   flask db upgrade
+   ```
+
+5. Update your `update_db_schema.py` script:
+   If you're using a custom script to manage migrations, ensure it's correctly configured to use the Flask-Migrate extension and that it's looking for the `alembic.ini` file in the right location.
+
+Here's a basic structure for your `update_db_schema.py` script that should work with Flask-Migrate:
+
+```python
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'your_database_uri_here'
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+# Define your models here
+
+if __name__ == '__main__':
+    with app.app_context():
+        # This will use Flask-Migrate to run migrations
+        from flask_migrate import upgrade as db_upgrade
+        db_upgrade()
+```
+
+Make sure your `SQLALCHEMY_DATABASE_URI` is correctly set to point to your database.
+
+After making these changes, try running your `update_db_schema.py` script again. It should now be able to find the `alembic.ini` file and perform the migration successfully.
+
+If you continue to encounter issues, please provide more information about your project structure and the contents of your `update_db_schema.py` file, and I'll be happy to help further.
