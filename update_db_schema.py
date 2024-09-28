@@ -46,6 +46,14 @@ def create_migration():
 def apply_migration():
     upgrade()
 
+def init_migration():
+    if not os.path.exists('migrations'):
+        logging.info("Initializing migration environment...")
+        init()
+        stamp('head')
+    else:
+        logging.info("Migration environment already initialized.")
+
 def run_migrations():
     logging.info("Starting migration process...")
     
@@ -60,12 +68,8 @@ def run_migrations():
         return
 
     try:
-        logging.info("Initializing migration...")
-        if not os.path.exists('migrations'):
-            logging.info("Creating migrations directory...")
-            init()
-            stamp('head')
-
+        init_migration()
+        
         logging.info("Creating new migration...")
         create_migration()
 
