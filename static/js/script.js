@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add floating symbols
     const floatingSymbols = document.getElementById('floating-symbols');
-    const symbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '☽', '☀', '★'];
+    const symbols = ['☽', '☀', '★'];
     for (let i = 0; i < 20; i++) {
         const symbol = document.createElement('div');
         symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];

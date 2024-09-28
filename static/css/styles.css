@@ -12,26 +12,6 @@ body {
     font-family: 'Spectral', serif;
 }
 
-/* Fog animation */
-@keyframes fog {
-    0% { transform: translateX(-100%); opacity: 0; }
-    50% { opacity: 0.5; }
-    100% { transform: translateX(100%); opacity: 0; }
-}
-
-.fog {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 200%;
-    height: 100%;
-    background-image: url('../images/fog.png');
-    background-size: contain;
-    animation: fog 60s linear infinite;
-    pointer-events: none;
-    z-index: -1;
-}
-
 /* Floating symbols */
 @keyframes float {
     0% { transform: translateY(0px); }
@@ -107,16 +87,6 @@ select {
 
 .float-text {
     animation: float-text 3s ease-in-out infinite;
-}
-
-/* Candle flames */
-.candle-flame {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    background-image: url('../images/candle-flame.gif');
-    background-size: contain;
-    pointer-events: none;
 }
 
 /* Star field */
