@@ -57,6 +57,18 @@ def init_migration():
 script_location = migrations
 sqlalchemy.url = %(DATABASE_URL)s
 
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# Logging configuration
 [loggers]
 keys = root,sqlalchemy,alembic
 
