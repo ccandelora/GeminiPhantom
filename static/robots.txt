@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+Disallow: /past_sessions
+
+Sitemap: https://mystic-insights.repl.co/sitemap.xml

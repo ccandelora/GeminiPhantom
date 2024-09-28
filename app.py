@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import google.generativeai as genai
 from models import db, User, Session
@@ -141,6 +141,19 @@ def ask_psychic():
 def past_sessions():
     sessions = current_user.sessions.order_by(Session.timestamp.desc()).all()
     return render_template('past_sessions.html', sessions=sessions)
+
+@app.route('/robots.txt')
+@app.route('/sitemap.xml')
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
